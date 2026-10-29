@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Tradex.journal</title>
+<link rel="icon" href="TradeX.png">
+
+<!-- Library ikon Tabler -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+
+<!-- Font Google: Space Grotesk, Inter, IBM Plex Mono -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- File CSS (semua tampilan/desain ada di sini) -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= MOBILE HEADER + MENU =================
+     Header atas & menu burger, hanya tampil di layar HP (<= 860px) -->
+<div class="m-header" id="mHeader">
+  <div class="m-brand">
+    <img src="TradeX.png" alt="">
+    <span>TRADEX.JOURNAL</span>
+  </div>
+  <div class="m-lang">
+    <button type="button" data-lang="id">ID</button>
+    <button type="button" data-lang="en">EN</button>
+  </div>
+  <button type="button" class="m-btn" id="mTheme"><i class="ti ti-moon"></i></button>
+  <button type="button" class="m-btn" id="mBurger"><i class="ti ti-menu-2"></i></button>
+</div>
+<div class="m-menu" id="mMenu">
+  <select class="m-acc" id="mAccSelect"></select>
+  <div id="mMenuList"></div>
+</div>
+
+<!-- ================= TICKER (BAR ATAS DESKTOP) =================
+     Teks berjalan + pilihan bahasa + tombol tema -->
+<div class="ticker">
+  <div class="ticker-scroll"><div class="ticker-track" id="tickerTrack"></div></div>
+  <div class="topbar-controls">
+    <select class="mini-select acc-mobile" id="accMobileSelect" title="Account"></select>
+    <select class="mini-select" id="langSelect" title="Language">
+      <option value="id">Bahasa Indonesia</option>
+      <option value="en">English</option>
+      <option value="es">Español</option>
+      <option value="fr">Français</option>
+      <option value="pt">Português</option>
+      <option value="de">Deutsch</option>
+    </select>
+    <div class="icon-btn" id="themeToggle"><i class="ti ti-moon"></i></div>
+  </div>
+</div>
+
+<!-- ================= SIDEBAR (MENU KIRI DESKTOP) =================
+     Logo, switcher akun, menu navigasi, dan tombol reset data -->
+<div class="sidebar">
+  <div class="brand">
+    <img class="brand-logo" src="TradeX.png" alt="Tradex.journal">
+    <div class="brand-name">Tradex.journal</div>
+  </div>
+
+  <!-- Switcher akun journal -->
+  <div class="acc-switch" id="accSwitch">
+    <div class="acc-switch-btn" id="accSwitchBtn">
+      <div style="min-width:0;">
+        <div class="acc-switch-name" id="accSwitchName">—</div>
+        <div class="acc-switch-eq" id="accSwitchEq">—</div>
+      </div>
+      <i class="ti ti-chevron-down" style="color:var(--text-3);"></i>
+    </div>
+    <div class="acc-menu" id="accMenu"></div>
+  </div>
+
+  <!-- Menu navigasi (data-screen = id halaman tujuan) -->
+  <div class="nav-item active" data-screen="dashboard"><i class="ti ti-chart-bar"></i><span data-i18n="nav_dashboard">Dashboard</span></div>
+  <div class="nav-item" data-screen="journal"><i class="ti ti-list"></i><span data-i18n="nav_journal">Journal</span></div>
+  <div class="nav-item" data-screen="strategy"><i class="ti ti-target-arrow"></i><span data-i18n="nav_strategy">Strategy</span></div>
+  <div class="nav-item" data-screen="add"><i class="ti ti-plus"></i><span data-i18n="nav_add">Tambah trade</span></div>
+  <div class="nav-item" data-screen="detail"><i class="ti ti-file-text"></i><span data-i18n="nav_detail">Detail trade</span></div>
+  <div class="nav-item" data-screen="calendar"><i class="ti ti-calendar"></i><span data-i18n="nav_calendar">Kalender</span></div>
+  <div class="nav-item" data-screen="settings"><i class="ti ti-settings"></i><span data-i18n="nav_settings">Pengaturan</span></div>
+  <div class="nav-footer">
+    <span id="navUserLabel">Trader</span><br>
+    <span id="logoutBtn" data-i18n="nav_reset">Reset data</span>
+  </div>
+</div>
+
+<!-- ================= AREA KONTEN UTAMA =================
+     Semua halaman (screen) ada di dalam .main, hanya satu yang aktif -->
+<div class="main">
+
+  <!-- ================= DASHBOARD =================
+       Ringkasan statistik, equity curve, performa per pair, trade terbaru -->
+  <div class="screen active" id="screen-dashboard">
+    <div class="page-head">
+      <div class="page-title" data-i18n="dash_title">Dashboard</div>
+      <div class="page-sub" data-i18n="dash_sub">Ringkasan performa trading kamu — otomatis dari data journal</div>
+    </div>
+    <div class="grid-4">
+      <div class="card"><div class="metric-label" data-i18n="m_total_pl">Total P&amp;L</div><div class="metric-value" id="mTotalPL">$0.00</div></div>
+      <div class="card"><div class="metric-label" data-i18n="m_win_rate">Win rate</div><div class="metric-value" id="mWinRate">0%</div></div>
+      <div class="card"><div class="metric-label" data-i18n="m_avg_rr">Avg. R:R</div><div class="metric-value" id="mAvgRR">1:0</div></div>
+      <div class="card"><div class="metric-label" data-i18n="m_total_trades">Total trade</div><div class="metric-value" id="mTotalTrades">0</div></div>
+    </div>
+    <div class="grid-4">
+      <div class="card"><div class="metric-label" data-i18n="m_profit_factor">Profit factor</div><div class="metric-value small" id="mProfitFactor">—</div></div>
+      <div class="card"><div class="metric-label" data-i18n="m_best_trade">Trade terbaik</div><div class="metric-value small pos" id="mBestTrade">$0.00</div></div>
+      <div class="card"><div class="metric-label" data-i18n="m_worst_trade">Trade terburuk</div><div class="metric-value small neg" id="mWorstTrade">$0.00</div></div>
+      <div class="card"><div class="metric-label" data-i18n="m_max_dd">Max drawdown</div><div class="metric-value small" id="mMaxDD">$0.00</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span data-i18n="card_equity">Equity curve</span></div>
+        <svg class="equity-svg" viewBox="0 0 400 130" preserveAspectRatio="none" id="equitySvg"></svg>
+      </div>
+      <div class="card">
+        <div class="card-title"><span data-i18n="card_pair_perf">Performa per pair</span></div>
+        <div id="pairPerf"><div class="empty-note" data-i18n="empty_data">Belum ada data.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span data-i18n="card_recent">Trade terbaru</span></div>
+      <table class="wide-table">
+        <tr><th data-i18n="th_date">Tanggal</th><th data-i18n="th_pair">Pair</th><th data-i18n="th_dir">Arah</th><th data-i18n="th_rr">R:R</th><th data-i18n="th_result">Hasil</th></tr>
+        <tbody id="recentTradesBody"></tbody>
+      </table>
+      <div id="recentEmpty" class="empty-note" style="display:none;" data-i18n="empty_recent">Belum ada trade. Yuk tambah trade pertamamu.</div>
+    </div>
+  </div>
+
+  <!-- ================= JOURNAL =================
+       Tabel semua riwayat trade + filter (Semua/Profit/Loss) + pencarian -->
+  <div class="screen" id="screen-journal">
+    <div class="page-head">
+      <div class="page-title" data-i18n="journal_title">Journal</div>
+      <div class="page-sub" data-i18n="journal_sub">Semua riwayat trade kamu — klik baris untuk lihat detail</div>
+    </div>
+    <div class="filter-row">
+      <div class="chip-group">
+        <div class="chip active" data-filter="semua" data-i18n="filter_all">Semua</div>
+        <div class="chip" data-filter="profit" data-i18n="filter_profit">Profit</div>
+        <div class="chip" data-filter="loss" data-i18n="filter_loss">Loss</div>
+      </div>
+      <input type="text" class="search-input" id="journalSearch" data-i18n-ph="search_ph" placeholder="Cari pair, tag, atau alasan...">
+    </div>
+    <div class="card">
+      <table class="wide-table">
+        <tr>
+          <th class="sortable" data-sort="date" data-i18n="th_date">Tanggal</th>
+          <th data-i18n="th_pair">Pair</th>
+          <th data-i18n="th_dir">Arah</th>
+          <th data-i18n="th_entry">Entry</th>
+          <th data-i18n="th_exit">Exit</th>
+          <th data-i18n="th_rr">R:R</th>
+          <th class="sortable" data-sort="hasil" data-i18n="th_result">Hasil</th>
+        </tr>
+        <tbody id="journalBody"></tbody>
+      </table>
+      <div id="journalEmpty" class="empty-note" style="display:none;" data-i18n="empty_journal_filtered">Belum ada trade yang cocok dengan filter ini.</div>
+    </div>
+  </div>
+
+  <!-- ================= STRATEGY =================
+       Kartu setup (5 kolom) dengan thumbnail screenshot -->
+  <div class="screen" id="screen-strategy">
+    <div class="page-head">
+      <div class="page-title" data-i18n="strat_title">Strategy</div>
+      <div class="page-sub" data-i18n="strat_sub">Kumpulan setup dari journal kamu — otomatis update saat trade ditambah, diedit, atau dihapus</div>
+    </div>
+    <div class="filter-row">
+      <div class="chip-group">
+        <div class="s-chip active" data-sfilter="semua" data-i18n="filter_all">Semua</div>
+        <div class="s-chip" data-sfilter="Buy" data-i18n="filter_buy">Buy</div>
+        <div class="s-chip" data-sfilter="Sell" data-i18n="filter_sell">Sell</div>
+      </div>
+      <input type="text" class="search-input" id="strategySearch" data-i18n-ph="strat_search_ph" placeholder="Cari pair, sesi, atau setup...">
+    </div>
+    <div class="strat-grid" id="strategyGrid"></div>
+    <div id="strategyEmpty" class="card empty-note" style="display:none;" data-i18n="strat_empty">Belum ada setup. Tambah trade dulu, nanti otomatis muncul di sini.</div>
+  </div>
+
+  <!-- ================= ADD / EDIT TRADE =================
+       Form tambah/edit trade dengan 2 mode: Basic (cepat) dan Pro (lengkap) -->
+  <div class="screen" id="screen-add">
+    <div class="page-head">
+      <div class="page-title" id="addPageTitle" data-i18n="add_title_new">Tambah trade</div>
+      <div class="page-sub" data-i18n="add_sub">Pilih mode sesuai kebutuhan: cepat catat (Basic) atau jurnal lengkap (Pro)</div>
+    </div>
+    <div class="card">
+
+      <!-- Tombol pilih mode -->
+      <div class="mode-switch">
+        <div class="mode-btn active" data-mode="basic"><b data-i18n="mode_basic">Basic</b><small data-i18n="mode_basic_sub">Catat cepat, 30 detik</small></div>
+        <div class="mode-btn" data-mode="pro"><b data-i18n="mode_pro">Pro</b><small data-i18n="mode_pro_sub">Jurnal lengkap &amp; analisis</small></div>
+      </div>
+
+      <!-- ============ MODE BASIC ============ -->
+      <div class="mode-panel active" id="mode-basic">
+        <div class="field-grid">
+          <div class="field"><label data-i18n="lbl_date">Tanggal</label><input type="date" id="b-date"></div>
+          <div class="field"><label data-i18n="lbl_pair">Pair *</label><input type="text" id="b-pair" data-i18n-ph="ph_pair" placeholder="XAUUSD"></div>
+          <div class="field"><label data-i18n="lbl_dir">Arah *</label>
+            <div class="opt-row">
+              <div class="opt opt-wide dir-buy" data-g="arah" data-v="Buy" data-i18n="opt_buy">Buy</div>
+              <div class="opt opt-wide dir-sell" data-g="arah" data-v="Sell" data-i18n="opt_sell">Sell</div>
+            </div>
+          </div>
+          <div class="field"><label data-i18n="lbl_session_basic">Sesi trading</label>
+            <div class="opt-row" data-group="session" data-list="sessionBasic"></div>
+          </div>
+          <div class="field"><label data-i18n="lbl_entry_short">Entry *</label><input type="text" id="b-entry" data-i18n-ph="ph_entry" placeholder="2318.40" inputmode="decimal"></div>
+          <div class="field"><label data-i18n="lbl_close">Close *</label><input type="text" id="b-exit" data-i18n-ph="ph_exit" placeholder="2324.10" inputmode="decimal"></div>
+          <div class="field"><label data-i18n="lbl_rr_manual">R:R (isi manual)</label><input type="text" id="b-rr" placeholder="1:2"></div>
+          <div class="field"><label data-i18n="lbl_pnl">P&amp;L *</label><input type="text" id="b-hasil" data-i18n-ph="ph_result" placeholder="185.00 atau -42.00" inputmode="decimal"></div>
+        </div>
+        <div class="field-grid">
+          <div class="field"><label data-i18n="lbl_size">Size / lot</label><input type="text" id="b-lot" data-i18n-ph="ph_lot" placeholder="0.10" inputmode="decimal"></div>
+          <div class="field"><label data-i18n="lbl_reason">Alasan entry</label><input type="text" id="b-alasan" data-i18n-ph="ph_reason" placeholder="Breakout support + konfirmasi H1"></div>
+        </div>
+        <div class="field mb"><label data-i18n="lbl_screenshot">Screenshot</label>
+          <div class="dropzone" id="b-dropzone" data-i18n="dropzone_text">Tarik screenshot ke sini, klik untuk unggah, atau tempel dengan Ctrl/Cmd+V</div>
+          <input type="file" id="b-f-images" accept="image/*" multiple style="display:none;">
+          <div class="img-preview-grid" id="b-imgPreviewGrid" style="margin-top:12px; margin-bottom:0;"></div>
+        </div>
+        <div class="field mb"><label data-i18n="lbl_quality">Kualitas setup</label>
+          <div class="opt-grid g4">
+            <div class="opt opt-q" data-g="quality" data-v="A"><b>A</b><small data-i18n="q_A">Sempurna</small></div>
+            <div class="opt opt-q" data-g="quality" data-v="B"><b>B</b><small data-i18n="q_B">Bagus</small></div>
+            <div class="opt opt-q" data-g="quality" data-v="C"><b>C</b><small data-i18n="q_C">Biasa</small></div>
+            <div class="opt opt-q" data-g="quality" data-v="D"><b>D</b><small data-i18n="q_D">Asal masuk</small></div>
+          </div>
+        </div>
+        <div class="field mb"><label data-i18n="lbl_psych">Kondisi psikologi saat trade</label>
+          <div class="opt-row" data-group="psych" data-list="psych"></div>
+        </div>
+      </div>
+
+      <!-- ============ MODE PRO ============ -->
+      <div class="mode-panel" id="mode-pro">
+
+        <!-- Section: Info trade -->
+        <div class="sec" id="secInfo">
+          <div class="sec-head" data-i18n="sec_info">Info trade</div>
+          <div class="sec-body">
+            <div class="field-grid">
+              <div class="field"><label data-i18n="lbl_symbol">Symbol *</label><input type="text" id="p-pair" data-i18n-ph="ph_pair" placeholder="XAUUSD"></div>
+              <div class="field"><label data-i18n="lbl_date">Tanggal</label><input type="date" id="p-date"></div>
+            </div>
+            <div class="field mb"><label data-i18n="lbl_asset">Aset</label><div class="opt-row" data-group="asset" data-list="asset"></div></div>
+            <div class="field-grid">
+              <div class="field"><label data-i18n="lbl_ttype">Tipe trade</label><div class="opt-row" data-group="ttype" data-list="ttype"></div></div>
+              <div class="field"><label data-i18n="lbl_dir">Arah *</label>
+                <div class="opt-row">
+                  <div class="opt opt-wide dir-buy" data-g="arah" data-v="Buy" data-i18n="opt_long">↑ Long</div>
+                  <div class="opt opt-wide dir-sell" data-g="arah" data-v="Sell" data-i18n="opt_short">↓ Short</div>
+                </div>
+              </div>
+            </div>
+            <div class="field mb"><label data-i18n="lbl_session">Sesi</label><div class="opt-row" data-group="session" data-list="sessionPro"></div></div>
+            <div class="hint" id="dateHint"></div>
+            <div class="field" style="margin-bottom:0;"><label data-i18n="lbl_plan">Sesuai trading plan?</label><div class="opt-row" data-group="plan" data-list="plan"></div></div>
+          </div>
+        </div>
+
+        <!-- Section: Eksekusi (entry, exit, SL, TP, R:R otomatis) -->
+        <div class="sec" id="secExec">
+          <div class="sec-head" data-i18n="sec_exec">Eksekusi</div>
+          <div class="sec-body">
+            <div class="field-grid">
+              <div class="field"><label data-i18n="lbl_entry">Entry price *</label><input type="text" id="p-entry" data-i18n-ph="ph_entry" placeholder="2318.40" inputmode="decimal"></div>
+              <div class="field"><label data-i18n="lbl_exit">Exit price *</label><input type="text" id="p-exit" data-i18n-ph="ph_exit" placeholder="2324.10" inputmode="decimal"></div>
+              <div class="field"><label data-i18n="lbl_sl">Stop loss</label><input type="text" id="p-sl" data-i18n-ph="ph_sl" placeholder="2315.00" inputmode="decimal"></div>
+              <div class="field"><label data-i18n="lbl_tp">Take profit</label><input type="text" id="p-tp" data-i18n-ph="ph_tp" placeholder="2326.00" inputmode="decimal"></div>
+              <div class="field"><label data-i18n="lbl_size">Size / lot</label><input type="text" id="p-lot" data-i18n-ph="ph_lot" placeholder="0.10" inputmode="decimal"></div>
+              <div class="field"><label data-i18n="lbl_pnl">P&amp;L *</label><input type="text" id="p-hasil" data-i18n-ph="ph_result" placeholder="185.00 atau -42.00" inputmode="decimal"></div>
+              <div class="field"><label data-i18n="lbl_tin">Waktu entry</label><input type="time" id="p-tin"></div>
+              <div class="field"><label data-i18n="lbl_tout">Waktu close</label><input type="time" id="p-tout"></div>
+            </div>
+            <div class="rr-grid">
+              <div class="rr-box"><span data-i18n="lbl_rr_plan">Planned R:R (otomatis)</span><b id="p-rr-plan">—</b></div>
+              <div class="rr-box"><span data-i18n="lbl_rr_real">Realized R:R (otomatis)</span><b id="p-rr-real">—</b></div>
+            </div>
+            <div class="hint" data-i18n="hint_rr">Dihitung dari Entry, SL, TP, dan Exit. Tidak perlu isi manual.</div>
+            <div class="field" style="margin-bottom:0;"><label data-i18n="lbl_exitreason">Alasan exit</label><div class="opt-row" data-group="exitReason" data-list="exitReason"></div></div>
+          </div>
+        </div>
+
+        <!-- Section: Playbook & konfirmasi (default tertutup) -->
+        <div class="sec collapsed" id="secPlaybook">
+          <div class="sec-head" data-i18n="sec_playbook">Playbook &amp; konfirmasi</div>
+          <div class="sec-body">
+            <div class="field mb"><label data-i18n="lbl_setup">Setup / strategi</label><div class="opt-row" data-group="setup" data-list="setup"></div></div>
+            <div class="field mb"><label data-i18n="lbl_confirm">Konfirmasi entry</label><div class="opt-row" data-group="confirm" data-list="confirm"></div></div>
+            <div class="field mb"><label data-i18n="lbl_reason">Alasan setup</label><input type="text" id="p-alasan" data-i18n-ph="ph_reason" placeholder="Breakout support + konfirmasi H1"></div>
+            <div class="field" style="margin-bottom:0;"><label data-i18n="lbl_tags">Tag / strategi</label><input type="text" id="p-tags" data-i18n-ph="ph_tags" placeholder="breakout, news, scalping"></div>
+          </div>
+        </div>
+
+        <!-- Section: Emosi & psikologi -->
+        <div class="sec" id="secEmotion">
+          <div class="sec-head" data-i18n="sec_emotion">Emosi &amp; psikologi</div>
+          <div class="sec-body">
+            <div class="field mb"><label data-i18n="lbl_emo_pos">Positif — apa yang bikin kamu disiplin?</label><div class="opt-row" data-group="emoPos" data-list="emoPos"></div></div>
+            <div class="field mb"><label data-i18n="lbl_emo_neg">Negatif — apa yang merusak trade ini?</label><div class="opt-row" data-group="emoNeg" data-list="emoNeg"></div></div>
+            <div class="field" style="margin-bottom:0;"><label data-i18n="lbl_emotion">Catatan emosi</label><textarea id="p-emosi" data-i18n-ph="ph_emotion" placeholder="Tenang saat entry, sempat ragu waktu harga retest..."></textarea></div>
+          </div>
+        </div>
+
+        <!-- Section: Performa, catatan & screenshot -->
+        <div class="sec" id="secPerf">
+          <div class="sec-head" data-i18n="sec_perf">Performa &amp; catatan</div>
+          <div class="sec-body">
+            <div class="field mb"><label data-i18n="lbl_grade">Grade trade</label><div class="opt-grid g5" data-group="grade" data-list="grade"></div></div>
+            <div class="field mb"><label data-i18n="lbl_notes">Catatan</label><textarea id="p-catatan" data-i18n-ph="ph_notes" placeholder="Apa yang kamu pelajari dari trade ini?"></textarea></div>
+            <div class="field" style="margin-bottom:0;"><label data-i18n="lbl_screenshot">Screenshot</label>
+              <div class="dropzone" id="dropzone" data-i18n="dropzone_text">Tarik screenshot ke sini, klik untuk unggah, atau tempel dengan Ctrl/Cmd+V</div>
+              <input type="file" id="f-images" accept="image/*" multiple style="display:none;">
+              <div class="img-preview-grid" id="imgPreviewGrid" style="margin-top:12px; margin-bottom:0;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pesan error form + tombol simpan/batal -->
+      <div class="form-msg" id="formMsg"></div>
+      <div class="save-bar">
+        <div class="btn btn-ghost" id="cancelAddBtn" data-i18n="btn_cancel">Batal</div>
+        <div class="btn btn-primary" id="saveTradeBtn" data-i18n="btn_save">Simpan trade</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DETAIL TRADE =================
+       Detail satu trade: screenshot, catatan, data lengkap, tombol edit/hapus/sertifikat -->
+  <div class="screen" id="screen-detail">
+    <div class="page-head">
+      <div class="page-title" id="detailTitle" data-i18n="detail_title_default">Detail trade</div>
+      <div class="page-sub" id="detailSub" data-i18n="detail_sub_default">Belum ada trade dipilih</div>
+    </div>
+    <div class="detail-actions">
+      <div class="btn btn-ghost" id="editTradeBtn"><i class="ti ti-edit"></i> <span data-i18n="btn_edit">Edit</span></div>
+      <div class="btn btn-ghost" id="deleteTradeBtn"><i class="ti ti-trash"></i> <span data-i18n="btn_delete">Hapus</span></div>
+      <div class="btn btn-primary" id="certBtn"><i class="ti ti-certificate"></i> <span data-i18n="btn_cert">Unduh Sertifikat</span></div>
+    </div>
+    <div id="detailContent" class="detail-grid">
+      <div class="card">
+        <div class="detail-img" id="detailImgBox"><i class="ti ti-photo" style="font-size:30px"></i><span data-i18n="img_empty">Belum ada screenshot</span></div>
+        <div class="detail-thumbs" id="detailThumbs"></div>
+        <div class="note-block" id="detailNote"></div>
+      </div>
+      <div class="card" id="detailKv"></div>
+    </div>
+    <div id="detailEmpty" class="card empty-note" style="display:none;" data-i18n="detail_empty_msg">Belum ada trade dipilih. Buka Journal lalu klik salah satu trade, atau tambah trade baru.</div>
+  </div>
+
+  <!-- ================= KALENDER =================
+       Kalender P&L harian + Kalender News (Forex Factory) -->
+  <div class="screen" id="screen-calendar">
+    <div class="page-head">
+      <div class="page-title" data-i18n="cal_title">Kalender P&amp;L</div>
+      <div class="page-sub" data-i18n="cal_sub">P&amp;L harian mengikuti data trade yang tersimpan</div>
+    </div>
+
+    <!-- Kalender P&L -->
+    <div class="card" style="padding:14px;">
+      <div class="cal-summary"><span id="calMonthlyLabel">Monthly P/L:</span> <span id="calMonthlyPL">$0.00</span></div>
+      <div class="cal-toolbar">
+        <div class="cal-nav">
+          <span class="cal-arrow" onclick="pnlCalChangeMonth(-1)">&#8249;</span>
+          <span id="pnlCalMonthLabel">—</span>
+          <span class="cal-arrow" onclick="pnlCalChangeMonth(1)">&#8250;</span>
+        </div>
+        <div class="btn btn-ghost" id="calTodayBtn" style="padding:6px 12px;" onclick="pnlCalToday()">Today</div>
+      </div>
+      <div class="cal-scroll"><div class="cal-grid" id="pnlCalGrid"></div></div>
+      <div id="calDayDetail"></div>
+    </div>
+
+    <!-- ================= KALENDER NEWS ================= -->
+    <div class="card" id="newsCard" style="margin-top:16px;">
+      <div class="card-title">
+        <span data-i18n="news_title">Kalender News</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="page-sub" id="newsUpdated"></span>
+          <div class="icon-btn" id="newsRefreshBtn" title="Refresh"><i class="ti ti-refresh"></i></div>
+        </div>
+      </div>
+      <div class="filter-row">
+        <div class="chip-group" id="newsImpactChips">
+          <div class="n-chip active" data-impact="all" data-i18n="news_all">Semua</div>
+          <div class="n-chip" data-impact="High" data-i18n="news_high">High</div>
+          <div class="n-chip" data-impact="Medium" data-i18n="news_medium">Medium</div>
+          <div class="n-chip" data-impact="Low" data-i18n="news_low">Low</div>
+        </div>
+        <select class="mini-select" id="newsCurSelect" style="max-width:140px; font-size:12px; padding:7px 8px;"></select>
+      </div>
+      <div class="news-legend">
+        <span><i class="imp-dot imp-High"></i> High</span>
+        <span><i class="imp-dot imp-Medium"></i> Medium</span>
+        <span><i class="imp-dot imp-Low"></i> Low</span>
+        <span><i class="imp-dot imp-Holiday"></i> Holiday</span>
+      </div>
+      <div id="newsBody"></div>
+    </div>
+  </div>
+
+  <!-- ================= SETTINGS =================
+       Pengaturan global, daftar akun journal, export/import data -->
+  <div class="screen" id="screen-settings">
+    <div class="page-head">
+      <div class="page-title" data-i18n="settings_title">Pengaturan</div>
+      <div class="page-sub" data-i18n="settings_sub">Kelola akun, tampilan, dan data kamu</div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="field-grid">
+        <div class="field"><label data-i18n="lbl_username">Username</label><input type="text" id="settingsUsername" placeholder="trader_id"></div>
+        <div class="field"><label data-i18n="lbl_currency">Mata uang akun</label>
+          <select id="settingsCurrency">
+            <option value="USD">USD — US Dollar</option>
+            <option value="EUR">EUR — Euro</option>
+            <option value="IDR">IDR — Rupiah</option>
+            <option value="JPY">JPY — Yen</option>
+          </select>
+        </div>
+        <div class="field"><label data-i18n="lbl_language">Bahasa</label>
+          <select id="settingsLanguage">
+            <option value="id">Bahasa Indonesia</option>
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="pt">Português</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+        <div class="field"><label data-i18n="lbl_theme">Tema tampilan</label>
+          <select id="settingsTheme">
+            <option value="dark" data-i18n="theme_dark">Gelap</option>
+            <option value="light" data-i18n="theme_light">Terang</option>
+          </select>
+        </div>
+      </div>
+      <div class="save-bar"><div class="btn btn-primary" id="saveSettingsBtn" data-i18n="btn_save_settings">Simpan perubahan</div></div>
+    </div>
+
+    <!-- Journal Accounts -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="acc-head">
+        <div class="acc-head-left">
+          <i class="ti ti-users"></i>
+          <div>
+            <div class="acc-title" data-i18n="acc_title">Journal Accounts</div>
+            <div class="page-sub" data-i18n="acc_sub">Manage multiple trading journals from one place</div>
+          </div>
+        </div>
+        <div class="btn btn-primary" id="addAccBtn"><i class="ti ti-plus"></i> <span data-i18n="acc_add">Add journal account</span></div>
+      </div>
+      <div class="acc-grid" id="accGrid"></div>
+    </div>
+
+    <!-- Manajemen data (backup JSON) -->
+    <div class="card">
+      <div class="card-title"><span data-i18n="data_mgmt_title">Manajemen data</span></div>
+      <div class="page-sub" style="margin-bottom:14px;" data-i18n="data_mgmt_sub">Cadangkan atau pulihkan seluruh data trade kamu dalam format JSON</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="btn btn-ghost" id="exportBtn"><i class="ti ti-download"></i> <span data-i18n="btn_export">Export data</span></div>
+        <div class="btn btn-ghost" id="importBtn"><i class="ti ti-upload"></i> <span data-i18n="btn_import">Import data</span></div>
+        <input type="file" id="importFile" accept="application/json" style="display:none;">
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= HALAMAN AKUN (Manage / Add account) =================
+       Halaman kelola 1 akun: header, tab Dashboard/Trades/Statistics/Settings -->
+  <div class="screen" id="screen-account">
+    <div class="card acc-hero" style="margin-bottom:14px;">
+      <div class="acc-hero-top">
+        <div class="acc-hero-left">
+          <div class="acc-icon" id="accHeroIcon"><i class="ti ti-wallet"></i></div>
+          <div style="min-width:0;">
+            <div class="page-title" id="accHeroName" style="font-size:18px; margin-bottom:2px;">—</div>
+            <div class="page-sub" id="accHeroCrumb">—</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="acc-pill on" id="accHeroBadge">Live</span>
+          <div class="btn btn-ghost" id="accHeroSettingsBtn"><i class="ti ti-settings"></i> <span data-i18n="acc_tab_settings">Settings</span></div>
+        </div>
+      </div>
+      <div class="acc-chips" id="accChips"></div>
+    </div>
+
+    <div class="card">
+      <div class="tabs" id="accTabs">
+        <div class="acc-tab active" data-acctab="dashboard" data-i18n="acc_tab_dashboard">Dashboard</div>
+        <div class="acc-tab" data-acctab="trades" data-i18n="acc_tab_trades">Trades</div>
+        <div class="acc-tab" data-acctab="stats" data-i18n="acc_tab_stats">Statistics</div>
+        <div class="acc-tab" data-acctab="settings" data-i18n="acc_tab_settings">Settings</div>
+      </div>
+
+      <div class="acc-panel active" id="accpanel-dashboard"></div>
+      <div class="acc-panel" id="accpanel-trades"></div>
+      <div class="acc-panel" id="accpanel-stats"></div>
+
+      <!-- Panel pengaturan akun (form nama, broker, platform, tipe, mata uang, saldo awal) -->
+      <div class="acc-panel" id="accpanel-settings">
+        <div class="acc-set-title" data-i18n="acc_settings_title">Account Settings</div>
+        <div class="page-sub" style="margin-bottom:16px;" data-i18n="acc_settings_sub">Manage account details without changing global app preferences.</div>
+        <div class="card">
+          <div class="card-title"><span data-i18n="acc_basic">Basic information</span></div>
+          <div class="form-msg" id="accFormMsg"></div>
+          <div class="field-grid">
+            <div class="field"><label data-i18n="acc_f_name">Account name</label><input type="text" id="a-name" placeholder="Apex 50K"></div>
+            <div class="field"><label data-i18n="acc_f_broker">Broker / Prop Firm</label><input type="text" id="a-broker" data-i18n-ph="acc_f_broker_ph" placeholder="Enter broker name"></div>
+            <div class="field"><label data-i18n="acc_f_platform">Platform</label>
+          <select id="a-platform">
+            <option value="MetaTrader 5">MetaTrader 5</option>
+            <option value="MetaTrader 4">MetaTrader 4</option>
+            <option value="cTrader">cTrader</option>
+            <option value="TradeLocker">TradeLocker</option>
+            <option value="Match-Trader">Match-Trader</option>
+            <option value="DXtrade">DXtrade</option>
+            <option value="Trader Evolution">Trader Evolution</option>
+            <option value="Sirix">Sirix</option>
+            <option value="Currenex">Currenex</option>
+            <option value="Rithmic">Rithmic</option>
+            <option value="Tradovate">Tradovate</option>
+            <option value="NinjaTrader">NinjaTrader</option>
+            <option value="CQG">CQG</option>
+            <option value="Sierra Chart">Sierra Chart</option>
+            <option value="Quantower">Quantower</option>
+            <option value="ATAS">ATAS</option>
+            <option value="Bookmap">Bookmap</option>
+            <option value="MotiveWave">MotiveWave</option>
+            <option value="TradeStation">TradeStation</option>
+            <option value="WealthCharts">WealthCharts</option>
+            <option value="Volumetrica">Volumetrica</option>
+            <option value="Interactive Brokers TWS">Interactive Brokers (TWS)</option>
+            <option value="Thinkorswim">Thinkorswim</option>
+            <option value="TradingView">TradingView</option>
+            <option value="Binance">Binance</option>
+            <option value="Bybit">Bybit</option>
+            <option value="OKX">OKX</option>
+            <option value="Other">Other</option>
+          </select>
+            </div>
+            <div class="field"><label data-i18n="acc_f_type">Account type</label>
+              <select id="a-type">
+                <option value="live" data-i18n="acc_type_live">Personal / Live</option>
+                <option value="demo" data-i18n="acc_type_demo">Demo</option>
+                <option value="funded" data-i18n="acc_type_funded">Funded Account</option>
+                <option value="challenge" data-i18n="acc_type_challenge">Challenge / Evaluation</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n="acc_f_currency">Currency</label>
+              <select id="a-currency">
+                <option value="USD">USD — US Dollar</option>
+                <option value="EUR">EUR — Euro</option>
+                <option value="GBP">GBP — British Pound</option>
+                <option value="IDR">IDR — Rupiah</option>
+                <option value="JPY">JPY — Yen</option>
+                <option value="AUD">AUD — Australian Dollar</option>
+                <option value="CAD">CAD — Canadian Dollar</option>
+                <option value="INR">INR — Indian Rupee</option>
+                <option value="BRL">BRL — Real</option>
+                <option value="MXN">MXN — Peso</option>
+                <option value="SGD">SGD — Singapore Dollar</option>
+                <option value="CNY">CNY — Yuan</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n="acc_f_balance">Starting balance</label><input type="text" id="a-balance" placeholder="10000" inputmode="decimal"></div>
+          </div>
+          <div class="save-bar" style="justify-content:space-between;">
+            <div class="btn btn-ghost" id="accDeleteBtn" style="color:var(--red);"><i class="ti ti-trash"></i> <span data-i18n="acc_delete">Delete account</span></div>
+            <div class="btn btn-primary" id="accSaveBtn" style="margin-left:auto;"><i class="ti ti-device-floppy"></i> <span id="accSaveLabel">Save account</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- akhir .main -->
+
+<!-- ================= LIGHTBOX =================
+     Pop-up untuk melihat screenshot dalam ukuran besar (bisa zoom & geser) -->
+<div class="lb" id="lightbox">
+  <div class="lb-top">
+    <div><span class="lb-title" id="lbTitle">—</span><span class="lb-count" id="lbCount"></span></div>
+    <div class="lb-actions">
+      <div class="lb-btn" id="lbZoomBtn"><i class="ti ti-zoom-in"></i> Zoom</div>
+      <div class="lb-btn" id="lbDetailBtn"><i class="ti ti-file-text"></i> Detail trade</div>
+      <div class="lb-btn" id="lbCloseBtn"><i class="ti ti-x"></i></div>
+    </div>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <div class="lb-nav lb-prev" id="lbPrev">&#8249;</div>
+    <img id="lbImg" alt="">
+    <div class="lb-nav lb-next" id="lbNext">&#8250;</div>
+  </div>
+</div>
+
+<!-- ================= TOAST CONTAINER =================
+     Tempat notifikasi kecil (berhasil disimpan, error, dll) -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ================= CONFIRM MODAL =================
+     Pop-up konfirmasi (hapus trade, reset data, hapus akun) -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle">—</div>
+    <div class="modal-msg" id="modalMsg">—</div>
+    <div class="modal-actions">
+      <div class="btn btn-ghost" id="modalCancelBtn">—</div>
+      <div class="btn btn-danger" id="modalConfirmBtn">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= STAGE SERTIFIKAT =================
+     Elemen sertifikat disembunyikan di luar layar, dipotret oleh html2canvas jadi gambar PNG -->
+<div id="certStage">
+  <div class="cert-card" id="certCard">
+    <div class="cert-tick tl"></div><div class="cert-tick tr"></div><div class="cert-tick bl"></div><div class="cert-tick br"></div>
+
+    <div class="cert-head">
+      <div class="cert-brand">
+        <img class="cert-brand-logo" src="TradeX.png" alt="Tradex.journal">
+        <div>
+          <div class="cert-brand-name">Tradex.journal</div>
+          <div class="cert-brand-sub">Trading Performance Ledger</div>
+        </div>
+      </div>
+      <div class="cert-serial">
+        <span id="certSerialLabel">No. Sertifikat</span><br><b id="certSerial">—</b><br><span id="certSerialDate">—</span>
+      </div>
+    </div>
+
+    <div class="cert-trader-row">
+      <div class="cert-trader-label" id="certTraderLabel">Atas Nama</div>
+      <div class="cert-trader-name" id="certTraderName">—</div>
+    </div>
+
+    <div class="cert-eyebrow-row">
+      <div class="cert-eyebrow"><span class="ln"></span> <span id="certEyebrow">SERTIFIKAT TRADE</span> <span class="ln"></span></div>
+      <div class="cert-title" id="certSubtitle">Hasil Transaksi Trading</div>
+    </div>
+
+    <div class="cert-pair-row">
+      <div class="cert-pair-name" id="certPair">—</div>
+      <div class="cert-dir-badge" id="certDirBadge">—</div>
+    </div>
+
+    <div class="cert-pnl-block">
+      <div class="cert-pnl-label" id="certPnlLabel">Hasil</div>
+      <div class="cert-pnl-value" id="certPnl">$0.00</div>
+      <div class="cert-pnl-rr"><span id="certRRLabel">Risk : Reward</span> — <b id="certRR">—</b> &nbsp;·&nbsp; <span id="certLotLabel">Lot</span> <b id="certLot">—</b></div>
+    </div>
+
+    <div class="cert-divider"><div class="line"></div><div class="diamond"></div><div class="line"></div></div>
+
+    <div class="cert-stat-grid">
+      <div class="cert-stat"><div class="cert-stat-label" id="certEntryLabel">Entry</div><div class="cert-stat-val" id="certEntry">—</div></div>
+      <div class="cert-stat"><div class="cert-stat-label" id="certExitLabel">Exit</div><div class="cert-stat-val" id="certExit">—</div></div>
+      <div class="cert-stat"><div class="cert-stat-label" id="certDateLabel">Tanggal</div><div class="cert-stat-val" id="certDate" style="font-size:19px;">—</div></div>
+      <div class="cert-stat"><div class="cert-stat-label" id="certSlLabel">Stop Loss</div><div class="cert-stat-val" id="certSl">—</div></div>
+      <div class="cert-stat"><div class="cert-stat-label" id="certTpLabel">Take Profit</div><div class="cert-stat-val" id="certTp">—</div></div>
+      <div class="cert-stat"><div class="cert-stat-label" id="certPairLabel">Pair</div><div class="cert-stat-val" id="certPairSmall" style="font-size:19px;">—</div></div>
+    </div>
+
+    <div class="cert-signature">
+      <svg width="260" height="100" viewBox="0 0 300 110" fill="none" xmlns="http://www.w3.org/2000/svg" id="certSparkline">
+        <line x1="0" y1="18" x2="300" y2="18" stroke="#3A3A3A" stroke-width="1" stroke-dasharray="3 4"/>
+        <line x1="0" y1="92" x2="300" y2="92" stroke="#3A3A3A" stroke-width="1" stroke-dasharray="3 4"/>
+        <path id="certSparkPath" d="" stroke="#4CAF7D" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <g id="certSparkMarkers"></g>
+      </svg>
+      <div class="cert-signature-text">
+        <div class="cert-signature-label" id="certNoteLabel">Catatan</div>
+        <div class="cert-signature-quote" id="certQuote">—</div>
+        <div class="cert-signature-note" id="certNote">—</div>
+      </div>
+    </div>
+
+    <div class="cert-foot">
+      <div class="cert-foot-left"><span id="certFootPrefix">Dibuat otomatis dari Tradex.journal</span><br><span id="certSetupLabel">Setup:</span> <b id="certSetup">—</b></div>
+      <div class="cert-stamp"><i></i> <span id="certVerified">TERVERIFIKASI</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Library html2canvas: dipakai untuk mengubah sertifikat jadi gambar PNG -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- File JavaScript (semua logika/sistem ada di sini). Harus di paling bawah supaya elemen HTML sudah ada -->
+<script src="script.js"></script>
+</body>
+</html>
